@@ -1,11 +1,11 @@
 This is the sample plugin for integrating 2 Way Sync using API with other 3rd party plugins.
 
-##### Assuming settings id
+#### Setting settings id
 ```
 $this->id = 'post_meta';
 ```
 
-##### Add Toggle to Settings
+#### Add Toggle to Settings
 ```
 add_filter( 'INSTAWP_CONNECT/Filters/migrate_settings', function ( $settings ) {
     $settings['sync_events_settings']['fields'][] = array(
@@ -21,7 +21,7 @@ add_filter( 'INSTAWP_CONNECT/Filters/migrate_settings', function ( $settings ) {
 } );
 ```
 
-##### Set Default Settings value as 'off'
+#### Set Default Settings value as 'off'
 ```
 add_filter( 'INSTAWP_CONNECT/Filters/default_two_way_sync_settings', function ( $settings ) {
     if ( $key === $this->id ) {
@@ -32,7 +32,7 @@ add_filter( 'INSTAWP_CONNECT/Filters/default_two_way_sync_settings', function ( 
 } );
 ```
 
-##### Record Event
+#### Record Event
 ```
 add_action( 'add_post_meta', function add_post_meta( $object_id, $meta_key, $meta_value ) {
     if ( ! InstaWP_Sync_Helpers::can_sync( $this->id ) ) { // See InstaWP Connect plugin for details.
@@ -61,7 +61,7 @@ add_action( 'add_post_meta', function add_post_meta( $object_id, $meta_key, $met
 }, 10, 3 );
 ```
 
-##### Parse/Process Event
+#### Parse/Process Event
 ```
 add_filter( 'INSTAWP_CONNECT/Filters/process_two_way_sync', function parse_event( $response, $data ) {
     $reference_id = $data->source_id;
