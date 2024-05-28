@@ -17,4 +17,5 @@ defined( 'ABSPATH' ) || exit;
 
 if ( defined( 'INSTAWP_PLUGIN_VERSION' ) ) {
 	require_once __DIR__ . '/classes/class-post-meta.php';
+	require_once __DIR__ . '/classes/class-term-meta.php';
 }
