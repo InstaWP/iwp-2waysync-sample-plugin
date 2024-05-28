@@ -58,7 +58,7 @@ add_action( 'add_post_meta', function add_post_meta( $object_id, $meta_key, $met
     // Here we are assuming generating a unique reference id for each event based on the object id.
     // This should be unique and in sync with the reference id in the sync response.
     do_action( 'INSTAWP_CONNECT/Actions/parse_two_way_sync', $event, $reference_id );
-} );
+}, 10, 3 );
 ```
 
 ##### Parse/Process Event
@@ -85,5 +85,5 @@ add_filter( 'INSTAWP_CONNECT/Filters/process_two_way_sync', function parse_event
     }
 
     return $response;
-} );
+}, 10, 2 );
 ```
