@@ -114,9 +114,9 @@ add_filter( 'instawp/filters/2waysync/process_event', function ( $response, $eve
 
 #### API Reference for 2 Way Sync
 
-1. InstaWP_Sync_Helpers::get_post_reference_id() - It generates a unique reference id for each post to sync it between source and destination.
-2. InstaWP_Sync_Helpers::get_user_reference_id() - It generates a unique reference id for each user to sync it between source and destination.
-3. InstaWP_Sync_Helpers::get_term_reference_id() - It generates a unique reference id for each term to sync it between source and destination.
-4. InstaWP_Sync_Helpers::get_post_by_reference() - It returns the WP_Post object, it accepts post type as first parameter, post unique reference id as 2nd parameter and post name as 3rd parameter.
-5. InstaWP_Sync_Helpers::sync_response() - It returns the expected sync response, it accepts event as first parameter, log as 2nd parameter and $args as 3rd parameter to override default values.
-6. InstaWP_Sync_Helpers::object_to_array() - It converts object to array.
+1. `InstaWP_Sync_Helpers::get_post_reference_id()` - It generates a unique reference id for each post to sync it between source and destination.
+2. `InstaWP_Sync_Helpers::get_user_reference_id()` - It generates a unique reference id for each user to sync it between source and destination.
+3. `InstaWP_Sync_Helpers::get_term_reference_id()` - It generates a unique reference id for each term to sync it between source and destination.
+4. `InstaWP_Sync_Helpers::get_post_by_reference()` - It returns the WP_Post object, it accepts post type as first parameter, post unique reference id as 2nd parameter and post name as 3rd parameter.
+5. `InstaWP_Sync_Helpers::sync_response()` - It returns the expected sync response, it accepts event as first parameter, log as 2nd parameter and $args as 3rd parameter to override default values.
+6. `InstaWP_Sync_Helpers::object_to_array()` - It converts object to array.
