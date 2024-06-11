@@ -86,7 +86,7 @@ add_filter( 'instawp/filters/2waysync/process_event', function ( $response, $eve
     // $response = empty array to be filled during the processing.
     // $event = event object.
     $reference_id = $event->reference_id;
-    $details      = InstaWP_Sync_Helpers::object_to_array( $event->details ); // converts 
+    $details      = InstaWP_Sync_Helpers::object_to_array( $event->details ); // converts object to array
 
     // create or update the post meta based on the event details.
     if ( in_array( $data->event_slug, array( 'post_meta_added', 'post_meta_updated' ), true ) && isset( $details['post'] ) ) { //depends on your implementation. 
@@ -105,7 +105,7 @@ add_filter( 'instawp/filters/2waysync/process_event', function ( $response, $eve
             }
         }
 
-        return InstaWP_Sync_Helpers::sync_response( $data, [], [] );
+        return InstaWP_Sync_Helpers::sync_response( $event, [], [] );
     }
 
     return $response;
@@ -119,3 +119,4 @@ add_filter( 'instawp/filters/2waysync/process_event', function ( $response, $eve
 3. InstaWP_Sync_Helpers::get_term_reference_id() - It generates a unique reference id for each term to sync it between source and destination.
 4. InstaWP_Sync_Helpers::get_post_by_reference() - It returns the WP_Post object, it accepts post type as first parameter, post unique reference id as 2nd parameter and post name as 3rd parameter.
 5. InstaWP_Sync_Helpers::sync_response() - It returns the expected sync response, it accepts event as first parameter, log as 2nd parameter and $args as 3rd parameter to override default values.
+6. InstaWP_Sync_Helpers::object_to_array() - It converts object to array.
