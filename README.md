@@ -26,6 +26,7 @@ add_filter( 'instawp/filters/2waysync/event_providers', function ( $providers ) 
         'id'      => $this->id, // instawp_sync_ should be added as prefix to the ID of the field.
         'title'   => __( 'Post Meta', 'iwp-2waysync-sample-plugin' ),
         'tooltip' => __( 'Enabling this option will allow plugin to log events related to all posts, pages and custom post types meta.', 'iwp-2waysync-sample-plugin' ),
+        'default' => 'off' // can be on/off
     );
 
     return $providers;
