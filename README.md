@@ -57,12 +57,11 @@ add_action( 'add_post_meta', function ( $object_id, $meta_key, $meta_value ) {
     $singular_name = InstaWP_Sync_Helpers::get_post_type_name( $post->post_type ); // Use this to generate event name. 
 
     $event         = [
-        'source' => $this->id,
-        'name'   => sprintf( __( '%s meta updated', 'iwp-2waysync-sample-plugin' ), $singular_name ), // Event name. Arbitrary text is fine. 
-        'slug'   => 'post_meta_added', // Event slug e.g post_meta_added or post_meta_deleted. 
-        'type'   => $post->post_type, // Event type e.g Object type i.e. Post/User/Term. Arbitrary text is fine. 
-        'title'  => $meta_key, // Event title.
-        'data'   => array(
+        'name'  => sprintf( __( '%s meta updated', 'iwp-2waysync-sample-plugin' ), $singular_name ), // Event name. Arbitrary text is fine. 
+        'slug'  => 'post_meta_added', // Event slug e.g post_meta_added or post_meta_deleted. 
+        'type'  => $post->post_type, // Event type e.g Object type i.e. Post/User/Term. Arbitrary text is fine. 
+        'title' => $meta_key, // Event title.
+        'data'  => array(
             'object_id'   => $object_id,
             'meta_key'    => $meta_key,
             'meta_value'  => maybe_serialize( $meta_value ),
@@ -71,7 +70,7 @@ add_action( 'add_post_meta', function ( $object_id, $meta_key, $meta_value ) {
     ];
 
     //Pass $event object and $reference_id for event to be recorded. 
-    do_action( 'instawp/actions/2waysync/record_event', $event, $reference_id );
+    do_action( 'instawp/actions/2waysync/record_event', $event, $reference_id, $this->id );
 }, 10, 3 );
 ```
 
