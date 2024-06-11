@@ -8,38 +8,25 @@ class InstaWP_Post_Meta {
 
 	public function __construct() {
 		// Add Settings.
-		add_filter( 'INSTAWP_CONNECT/Filters/migrate_settings', array( $this, 'migrate_settings' ), 10, 1 );
-
-		// Set Default Settings.
-		add_filter( 'INSTAWP_CONNECT/Filters/default_two_way_sync_settings', array( $this, 'default_settings' ), 10, 2 );
+		add_filter( 'instawp/filters/2waysync/event_providers', array( $this, 'add_provider' ) );
 
 		// Post Meta Actions.
 		add_action( 'add_post_meta', array( $this, 'add_post_meta' ), 10, 3 );
 		add_action( 'update_post_meta', array( $this, 'update_post_meta' ), 10, 4 );
 
 		// Process Events.
-		add_filter( 'INSTAWP_CONNECT/Filters/process_two_way_sync', array( $this, 'parse_event' ), 10, 2 );
+		add_filter( 'instawp/filters/2waysync/process_event', array( $this, 'process_event' ), 10, 2 );
 	}
 
-	public function migrate_settings( $settings ) {
-		$settings['sync_events_settings']['fields'][] = array(
-			'id'      => 'instawp_sync_' . $this->id, // instawp_sync_ should be added as prefix to the ID of the field.
-			'type'    => 'toggle',
+	public function add_provider( $providers ) {
+		$providers[] = array(
+			'id'      => $this->id,
 			'title'   => __( 'Post Meta', 'iwp-2waysync-sample-plugin' ),
 			'tooltip' => __( 'Enabling this option will allow plugin to log events related to all posts, pages and custom post types meta.', 'iwp-2waysync-sample-plugin' ),
-			'class'   => 'save-ajax',
-			'default' => 'off', // be default on, to make by default off, this flag need to set as off as well as the default value filter need to be used.
+			'default' => 'on', // Can be on/off, 'off' is default.
 		);
 
-		return $settings;
-	}
-
-	public function default_settings( $settings, $key ) {
-		if ( $key === $this->id ) {
-			$settings = 'off';
-		}
-
-		return $settings;
+		return $providers;
 	}
 
 	/**
@@ -51,6 +38,10 @@ class InstaWP_Post_Meta {
 	 */
 	public function add_post_meta( $object_id, $meta_key, $meta_value ) {
 		if ( ! InstaWP_Sync_Helpers::can_sync( $this->id ) ) { // See InstaWP Connect plugin for details.
+			return;
+		}
+
+		if ( in_array( $meta_key, array( '_edit_lock', 'instawp_event_sync_reference_id' ), true ) ) {
 			return;
 		}
 
@@ -70,9 +61,8 @@ class InstaWP_Post_Meta {
 			), // Event data.
 		];
 
-		// Here we are assuming generating a unique reference id for each event based on the object id.
-		// This should be unique and in sync with the reference id in the sync response.
-		do_action( 'INSTAWP_CONNECT/Actions/parse_two_way_sync', $event, $reference_id );
+		// Pass $event object, $reference_id and unique identifier for event to be recorded. 
+		do_action( 'instawp/actions/2waysync/record_event', $event, $reference_id, $this->id );
 	}
 
 	/**
@@ -85,6 +75,10 @@ class InstaWP_Post_Meta {
 	 */
 	public function update_post_meta( $meta_id, $object_id, $meta_key, $meta_value ) {
 		if ( ! InstaWP_Sync_Helpers::can_sync( $this->id ) ) { // See InstaWP Connect plugin for details.
+			return;
+		}
+
+		if ( in_array( $meta_key, [ '_edit_lock', 'instawp_event_sync_reference_id' ], true ) ) {
 			return;
 		}
 
@@ -105,37 +99,35 @@ class InstaWP_Post_Meta {
 			), // Event data.
 		];
 
-		// Here we are assuming generating a unique reference id for each event based on the object id.
-		// This should be unique and in sync with the reference id in the sync response.
-		do_action( 'INSTAWP_CONNECT/Actions/parse_two_way_sync', $event, $reference_id );
+		// Pass $event object, $reference_id and unique identifier for event to be recorded. 
+		do_action( 'instawp/actions/2waysync/record_event', $event, $reference_id, $this->id );
 	}
 
 	/**
 	 * Process Events.
 	 *
 	 * @param array $response
-	 * @param array $data
+	 * @param array $event
 	 * @return array
 	 */
-	public function parse_event( $response, $data ) {
-		$reference_id = $data->source_id;
-		$details      = InstaWP_Sync_Helpers::object_to_array( $data->details );
+	public function process_event( $response, $event ) {
+		$reference_id = $event->reference_id;
+		$details      = InstaWP_Sync_Helpers::object_to_array( $event->details );
 
 		// create and update
-		if ( in_array( $data->event_slug, array( 'post_meta_added', 'post_meta_updated' ), true ) ) {
-			$wp_post   = isset( $details['post'] ) ? $details['post'] : array();
-			$post_name = $wp_post['post_name'];
-
-			$post_by_reference_id = InstaWP_Sync_Helpers::get_post_by_reference( $wp_post['post_type'], $reference_id, $post_name );
+		if ( in_array( $event->event_slug, array( 'post_meta_added', 'post_meta_updated' ), true ) ) {
+			$wp_post              = $details['post'];
+			$post_by_reference_id = InstaWP_Sync_Helpers::get_post_by_reference( $wp_post['post_type'], $reference_id, $wp_post['post_name'] );
+			
 			if ( ! empty( $post_by_reference_id ) ) {
-				if ( $data->event_slug === 'post_meta_added' ) {
+				if ( $event->event_slug === 'post_meta_added' ) {
 					add_post_meta( $post_by_reference_id->ID, $details['meta_key'], maybe_unserialize( $details['meta_value'] ) );
 				} else {
 					update_post_meta( $post_by_reference_id->ID, $details['meta_key'], maybe_unserialize( $details['meta_value'] ) );
 				}
 			}
 
-			return InstaWP_Sync_Helpers::sync_response( $data );
+			return InstaWP_Sync_Helpers::sync_response( $data, [], [] );
 		}
 
 		return $response;
